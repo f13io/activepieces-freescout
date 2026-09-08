@@ -69,12 +69,23 @@ Separately: adding a *new* action or trigger name (not just editing an existing 
 
 ### Testing a webhook trigger against a real FreeScout instance
 
-FreeScout needs to reach the flow's webhook URL from the outside, so expose `localhost:4200` via a tunnel — any service that gives you a public HTTPS URL works (e.g. [localxpose](https://localxpose.io/), [tuns.sh](https://tuns.sh/), `ssh -R`-based tunnels, ngrok, Cloudflare Tunnel). Once you have a tunnel URL, two config changes are required inside the cloned monorepo (`~/activepieces`) before enabling a trigger — skipping either one is the most likely cause of a "Bad Gateway" or similar connection failure through the tunnel:
+FreeScout needs to reach the flow's webhook URL from the outside, so expose `localhost:4200` via a tunnel — any service that gives you a public HTTPS URL works (e.g. [localxpose](https://localxpose.io/), [tuns.sh](https://tuns.sh/), `ssh -R`-based tunnels, ngrok, Cloudflare Tunnel). Once you have a tunnel URL, three config changes are required inside the cloned monorepo (`~/activepieces`) before enabling a trigger — skipping any of them is the most likely cause of a "Bad Gateway", a rejected-host error, or a reload loop through the tunnel.
 
-1. **`.env.dev`** — set `AP_FRONTEND_URL` to the tunnel's URL, so Activepieces generates webhook URLs pointing at it instead of `localhost`.
-2. **`packages/web/vite.config.mts`** — uncomment `allowedHosts` and set it to the tunnel's domain (Vite's dev server rejects requests whose `Host` header isn't in this list). Note this file moved from `.ts` to `.mts` at some point upstream, if you're following older docs/screenshots that mention `.ts`.
+Run this from a terminal inside the devcontainer (it patches the checkout, not this repo):
 
-Restart `npm start` after changing either file — env vars are only read at boot, and a `.env.dev`/Vite config change isn't something the (already-unreliable, see above) file watcher would pick up regardless.
+```sh
+scripts/setup-tunnel.sh your-tunnel-domain.example.com
+```
+
+Then restart `npm start` — env vars are only read at boot, and a `.env.dev`/Vite config change isn't something the (already-unreliable, see above) file watcher would pick up regardless. The script is safe to re-run (e.g. against a new tunnel domain next session).
+
+What it does, if you'd rather make the edits by hand or are debugging why something's still not working:
+
+1. **`.env.dev`** — set `AP_FRONTEND_URL` to `https://your-tunnel-domain`, so Activepieces generates webhook URLs pointing at it instead of `localhost`.
+2. **`packages/web/vite.config.mts`** — set `server.allowedHosts` to `['your-tunnel-domain']` (Vite's dev server rejects requests whose `Host` header isn't in this list; the file ships with this commented out). Note this file moved from `.ts` to `.mts` at some point upstream, if you're following older docs/screenshots that mention `.ts`.
+3. **`packages/web/vite.config.mts`** — set `server.hmr` to `{ protocol: 'wss', clientPort: 443 }`. Without this, Vite's injected HMR client tries to open its websocket directly against `ws://localhost:4200`, which an HTTPS-loaded page blocks as mixed content — symptom is a reload loop once you open the tunnel URL.
+
+These are edits to the *cloned Activepieces checkout* (`~/activepieces`), not to this repo, so they aren't committed anywhere and won't survive a container rebuild — that's exactly why the script exists, so reapplying them is a one-liner instead of hunting this section down again.
 
 ## References
 
