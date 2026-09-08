@@ -91,3 +91,7 @@ These are edits to the *cloned Activepieces checkout* (`~/activepieces`), not to
 
 - [FreeScout API docs](https://api-docs.freescout.net/)
 - [Activepieces piece-building docs](https://www.activepieces.com/docs/developers)
+
+## License
+
+[Apache License 2.0](LICENSE)
