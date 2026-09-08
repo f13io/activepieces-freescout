@@ -8,5 +8,8 @@
   "remoteUser": "node",
   "hostRequirements": {
     "gpu": false
-  }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/home/node/activepieces/packages/pieces/custom/freescout,type=bind,consistency=cached"
+  ]
 }
