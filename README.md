@@ -2,7 +2,7 @@
 
 An [Activepieces](https://www.activepieces.com/) custom piece for [FreeScout](https://freescout.net/), a self-hosted help desk / shared mailbox.
 
-> This piece, its devcontainer setup, and this repo were built with AI assistance (Claude Code). Contributions and review are welcome the same as any other project.
+> This piece, its devcontainer setup, and this repo were built with AI assistance (Claude Code). See [AI_DISCLAIMER.md](AI_DISCLAIMER.md) for details. Contributions and review are welcome the same as any other project.
 
 ## What's included
 

@@ -1,0 +1,57 @@
+{
+  "project": {
+    "name": "activepieces-freescout",
+    "policy_url": "",
+    "date": "2026-09-08"
+  },
+  "tools": [
+    {
+      "name": "Claude Code (Anthropic)",
+      "model": "claude-sonnet-5",
+      "mode": "Mixed"
+    }
+  ],
+  "phases": [
+    {
+      "name": "Requirements & Scope",
+      "preset": "Human-led",
+      "human": 85,
+      "ai": 15
+    },
+    {
+      "name": "Architecture & Design",
+      "preset": "AI-collaborative",
+      "human": 35,
+      "ai": 65
+    },
+    {
+      "name": "Implementation",
+      "preset": "AI-generated with human review",
+      "human": 20,
+      "ai": 80
+    },
+    {
+      "name": "Testing",
+      "preset": "Collaborative",
+      "human": 60,
+      "ai": 40
+    },
+    {
+      "name": "Documentation",
+      "preset": "AI-generated with human review",
+      "human": 20,
+      "ai": 80
+    }
+  ],
+  "oversight": {
+    "label": "Collaborative",
+    "description": "Human and AI co-author decisions; human reviews all output."
+  },
+  "process": "Combination of inline suggestions, conversational assistance, and agentic tasks. Human maintained editorial control throughout.",
+  "accountability": "The human author(s) are solely responsible for the content, accuracy, and fitness-for-purpose of this project.",
+  "output": {
+    "format": "Markdown",
+    "filename": "AI_DISCLAIMER.md",
+    "theme": "auto"
+  }
+}
