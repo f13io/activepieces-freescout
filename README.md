@@ -17,7 +17,12 @@ Actions:
 
 Auth is a FreeScout instance URL + API key (`X-FreeScout-API-Key` header), since FreeScout is self-hosted rather than a single cloud API. Requires the **API & Webhooks** module installed on the FreeScout instance to get an API key (Manage » API & Webhooks).
 
-Triggers are not built yet (planned: webhook-based `New Conversation` / `New Customer Reply` / `New Note`, backed by FreeScout's native webhook subscription API).
+Triggers (webhook-based, backed by FreeScout's native webhook subscription API):
+
+- **New Conversation** — fires on `convo.created`.
+- **New Customer Reply** — fires on `convo.customer.reply.created`.
+
+More event triggers (New Note, Status Changed, etc.) can be added the same way — see `src/lib/common/webhook-trigger-factory.ts`.
 
 ## Code Mirrors
 Source code is automatically pushed to the following mirrors. **Note that issues and pull requests should be issued on the [main forge](https://git.f13.io/f13-dev/activepieces-freescout).**
@@ -56,9 +61,13 @@ devcontainer exec --workspace-folder . bash -lc "cd ~/activepieces && npm start"
 
 ## Testing changes
 
-This piece's repo is bind-mounted directly onto its path inside the cloned monorepo (`devcontainer.json`'s `mounts`), so edits here trigger the framework's own hot-reload — watch for `Changes are ready! Please refresh the frontend.` in the `npm start` output, then refresh the flow builder.
+**Hot-reload does not work in the devcontainer.** The framework's own file-watcher (`dev-piece-watcher.ts`, which rebuilds the piece automatically on save) relies on inotify, which doesn't fire on this Windows Docker Desktop bind-mount — confirmed by testing edits from both the host and inside the container. This is the same root cause as the general Windows/WSL guidance elsewhere in this project: cross-filesystem-boundary file-watching is unreliable, it just resurfaces here at the devcontainer's mount layer instead of WSL's. It may not affect Mac/Linux hosts, where bind mounts don't cross an NTFS boundary.
 
-**Note:** adding a *new* action or trigger name (not just editing an existing one) requires restarting `npm start`. The execution engine caches loaded piece modules in memory and only picks up new exports on restart — editing an existing action's logic hot-reloads fine, but a brand-new action name won't be runnable until you restart.
+Until that's addressed (candidate fix: clone this repo onto a native Linux filesystem — e.g. inside WSL on Windows — and open the devcontainer from there instead of from a Windows path), **restart `npm start` after every source change** to pick it up; don't wait for `Changes are ready!` in the output, since it won't appear. This applies to edits to existing actions/triggers too, not just new action/trigger names.
+
+Separately: adding a *new* action or trigger name (not just editing an existing one) always requires a restart regardless of platform — the execution engine caches loaded piece modules in memory and only picks up new exports on restart.
+
+To test a webhook trigger firing for real, FreeScout needs to reach the flow's webhook URL from the outside — expose `localhost:4200` via a tunnel (e.g. [localxpose](https://localxpose.io/)), then update `AP_FRONTEND_URL` in `.env.dev` to the tunnel URL before enabling the trigger.
 
 ## References
 
