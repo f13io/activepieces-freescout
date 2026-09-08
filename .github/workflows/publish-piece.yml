@@ -98,10 +98,15 @@ jobs:
           restore-keys: |
             bun-${{ steps.ap_ref.outputs.ref }}-
 
+      # No --frozen-lockfile: bun.lock was generated upstream without this
+      # piece present, so installing after copying it into
+      # packages/pieces/custom/freescout necessarily changes the lockfile
+      # (registering the new workspace member) — expected, not drift to
+      # reject. This checkout is ephemeral per-run, nothing to preserve.
       - name: Install monorepo dependencies
         if: steps.check.outputs.should_publish == 'true'
         working-directory: activepieces-monorepo
-        run: bun install --frozen-lockfile
+        run: bun install
 
       - name: Setup Node for npm registry
         if: steps.check.outputs.should_publish == 'true'
