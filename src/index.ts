@@ -6,6 +6,8 @@ import { createCustomer } from './lib/actions/create-customer';
 import { updateCustomer } from './lib/actions/update-customer';
 import { findCustomer } from './lib/actions/find-customer';
 import { freescoutCustomApiCall } from './lib/actions/custom-api-call';
+import { newConversation } from './lib/triggers/new-conversation';
+import { newCustomerReply } from './lib/triggers/new-customer-reply';
 
 export const freescout = createPiece({
   displayName: 'FreeScout',
@@ -22,5 +24,5 @@ export const freescout = createPiece({
     createThread,
     freescoutCustomApiCall,
   ],
-  triggers: [],
+  triggers: [newConversation, newCustomerReply],
 });
