@@ -67,7 +67,14 @@ Until that's addressed (candidate fix: clone this repo onto a native Linux files
 
 Separately: adding a *new* action or trigger name (not just editing an existing one) always requires a restart regardless of platform — the execution engine caches loaded piece modules in memory and only picks up new exports on restart.
 
-To test a webhook trigger firing for real, FreeScout needs to reach the flow's webhook URL from the outside — expose `localhost:4200` via a tunnel (e.g. [localxpose](https://localxpose.io/)), then update `AP_FRONTEND_URL` in `.env.dev` to the tunnel URL before enabling the trigger.
+### Testing a webhook trigger against a real FreeScout instance
+
+FreeScout needs to reach the flow's webhook URL from the outside, so expose `localhost:4200` via a tunnel — any service that gives you a public HTTPS URL works (e.g. [localxpose](https://localxpose.io/), [tuns.sh](https://tuns.sh/), `ssh -R`-based tunnels, ngrok, Cloudflare Tunnel). Once you have a tunnel URL, two config changes are required inside the cloned monorepo (`~/activepieces`) before enabling a trigger — skipping either one is the most likely cause of a "Bad Gateway" or similar connection failure through the tunnel:
+
+1. **`.env.dev`** — set `AP_FRONTEND_URL` to the tunnel's URL, so Activepieces generates webhook URLs pointing at it instead of `localhost`.
+2. **`packages/web/vite.config.mts`** — uncomment `allowedHosts` and set it to the tunnel's domain (Vite's dev server rejects requests whose `Host` header isn't in this list). Note this file moved from `.ts` to `.mts` at some point upstream, if you're following older docs/screenshots that mention `.ts`.
+
+Restart `npm start` after changing either file — env vars are only read at boot, and a `.env.dev`/Vite config change isn't something the (already-unreliable, see above) file watcher would pick up regardless.
 
 ## References
 
