@@ -7,9 +7,11 @@ FROM mcr.microsoft.com/devcontainers/javascript-node:${VARIANT}
 # this is skipped — this is a speed optimization, not a requirement.)
 RUN npm i -g bun@1.4.0
 
-# Pin deliberately. Bump this to pull a newer upstream activepieces version,
-# then rebuild the container.
-ARG ACTIVEPIECES_REF=a3d1466b1c85643d0cdd38013cc96815f762442a
+# Pin deliberately. Bump activepieces-ref.txt to pull a newer upstream
+# activepieces version, then rebuild the container. This is also the source
+# of truth for the GitHub Actions release workflow (.github/workflows/), so
+# both dev and CI/publish always build against the same upstream commit.
+COPY activepieces-ref.txt /tmp/activepieces-ref.txt
 
 # Cloned at build time (baked into the image), not at container start.
 # Turborepo's workspace discovery rejects a workspace package whose real
@@ -20,4 +22,4 @@ ARG ACTIVEPIECES_REF=a3d1466b1c85643d0cdd38013cc96815f762442a
 # it's never a symlink at all.
 USER node
 RUN git clone https://github.com/activepieces/activepieces.git /home/node/activepieces \
-  && git -C /home/node/activepieces checkout ${ACTIVEPIECES_REF}
+  && git -C /home/node/activepieces checkout "$(cat /tmp/activepieces-ref.txt)"

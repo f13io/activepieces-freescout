@@ -1,0 +1,168 @@
+name: Publish Piece
+
+# This repo only holds the piece's source — building/publishing needs the
+# activepieces monorepo's own CLI, since a piece's @activepieces/* deps are
+# workspace:* ranges that only resolve inside that monorepo (see
+# https://www.activepieces.com/docs/build-pieces/misc/bundling-pieces). So this workflow bootstraps
+# a checkout of the pinned upstream commit (activepieces-ref.txt — same file
+# .devcontainer/Dockerfile reads, so dev and CI never drift), copies this
+# piece's source into it at packages/pieces/custom/freescout, and runs the
+# monorepo's own build+publish tooling from there.
+#
+# Triggered on every push to main (this is a Forgejo->GitHub mirror target,
+# so "push" here really means "Forgejo mirrored a push"). Whether anything
+# actually happens is gated on package.json's version not already being on
+# npm — most pushes (docs, non-version-bump commits) just no-op past the
+# first step. To ship a release: bump the version in package.json, add a
+# matching "## [x.y.z]" section to CHANGELOG.md, push to main.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout piece repo
+        uses: actions/checkout@v4
+
+      - name: Check whether this version is already published
+        id: check
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          PUBLISHED=$(npm view "$NAME@$VERSION" version 2>/dev/null || true)
+          if [ "$PUBLISHED" = "$VERSION" ]; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "$NAME@$VERSION is already published — nothing to do."
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "$NAME@$VERSION is new — will build and publish."
+          fi
+
+      - name: Verify CHANGELOG.md has an entry for this version
+        if: steps.check.outputs.should_publish == 'true'
+        run: |
+          VERSION="${{ steps.check.outputs.version }}"
+          if ! grep -qF "## [$VERSION]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [$VERSION]' heading. Add a changelog entry for this version before it can be published."
+            exit 1
+          fi
+
+      - name: Read pinned activepieces ref
+        if: steps.check.outputs.should_publish == 'true'
+        id: ap_ref
+        run: echo "ref=$(cat activepieces-ref.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout activepieces monorepo at pinned ref
+        if: steps.check.outputs.should_publish == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: activepieces/activepieces
+          ref: ${{ steps.ap_ref.outputs.ref }}
+          path: activepieces-monorepo
+
+      - name: Copy piece source into the monorepo
+        if: steps.check.outputs.should_publish == 'true'
+        run: |
+          TARGET=activepieces-monorepo/packages/pieces/custom/freescout
+          mkdir -p "$TARGET"
+          rsync -a \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='activepieces-monorepo' \
+            ./ "$TARGET"/
+
+      - name: Setup Bun
+        if: steps.check.outputs.should_publish == 'true'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Cache Bun install cache
+        if: steps.check.outputs.should_publish == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ steps.ap_ref.outputs.ref }}-${{ hashFiles('activepieces-monorepo/bun.lock') }}
+          restore-keys: |
+            bun-${{ steps.ap_ref.outputs.ref }}-
+
+      - name: Install monorepo dependencies
+        if: steps.check.outputs.should_publish == 'true'
+        working-directory: activepieces-monorepo
+        run: bun install --frozen-lockfile
+
+      - name: Setup Node for npm publish auth
+        if: steps.check.outputs.should_publish == 'true'
+        uses: actions/setup-node@v4
+        with:
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build and publish to npm
+        if: steps.check.outputs.should_publish == 'true'
+        working-directory: activepieces-monorepo
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: bun run publish-piece -- freescout
+
+      - name: Extract this version's changelog section
+        if: steps.check.outputs.should_publish == 'true'
+        run: |
+          VERSION="${{ steps.check.outputs.version }}"
+          awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" ver "\\]") { found=1; next }
+              next
+            }
+            found { print }
+          ' CHANGELOG.md > /tmp/release-notes.md
+          echo "--- release notes ---"
+          cat /tmp/release-notes.md
+
+      - name: Create GitHub release
+        if: steps.check.outputs.should_publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.check.outputs.version }}"
+          gh release create "v$VERSION" \
+            --title "v$VERSION" \
+            --notes-file /tmp/release-notes.md \
+            --target "${{ github.sha }}"
+
+      # Optional: only runs once FORGEJO_TOKEN is added as a repo secret. The
+      # Forgejo->GitHub mirror is one-directional, so a tag/release created
+      # here doesn't flow back on its own — this closes that loop. Forgejo's
+      # release API creates the tag too if it doesn't exist yet, and since
+      # this is a real git mirror (not a rewrite), github.sha is the same
+      # commit object on the Forgejo side.
+      - name: Create matching Forgejo release
+        if: steps.check.outputs.should_publish == 'true'
+        env:
+          FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+        run: |
+          if [ -z "$FORGEJO_TOKEN" ]; then
+            echo "FORGEJO_TOKEN not set, skipping Forgejo release."
+            exit 0
+          fi
+          VERSION="${{ steps.check.outputs.version }}"
+          BODY=$(jq -n \
+            --arg tag "v$VERSION" \
+            --arg sha "${{ github.sha }}" \
+            --rawfile notes /tmp/release-notes.md \
+            '{tag_name: $tag, target_commitish: $sha, name: $tag, body: $notes, draft: false, prerelease: false}')
+          curl -sf -X POST "https://git.f13.io/api/v1/repos/f13-dev/activepieces-freescout/releases" \
+            -H "Authorization: token $FORGEJO_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$BODY"

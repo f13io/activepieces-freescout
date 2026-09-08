@@ -50,8 +50,7 @@ content into the request body.
 FreeScout instances that can't expose a public webhook URL (no tunnel, no reverse proxy, closed
 network) currently can't use this piece's triggers at all, since both existing triggers are
 webhook-based. FreeScout's list-conversations endpoint supports `createdSince`/`updatedSince`
-filters, which map cleanly onto Activepieces' polling-trigger helper
-(`.claude/build-pieces/piece-reference/triggers/polling-trigger.mdx`).
+filters, which map cleanly onto Activepieces' [polling-trigger helper](https://www.activepieces.com/docs/build-pieces/piece-reference/triggers/polling-trigger).
 
 **Needs new infrastructure**: no polling trigger exists in this piece yet — this establishes the
 pattern, distinct from the webhook-trigger factory. Once built, it's a reasonable fallback/

@@ -1,7 +1,16 @@
 {
-  "name": "@activepieces/piece-freescout",
-  "version": "0.0.1",
+  "name": "@figure13/piece-freescout",
+  "version": "0.1.0",
+  "description": "Activepieces custom piece for FreeScout (self-hosted help desk)",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f13io/activepieces-freescout.git"
+  },
+  "bugs": {
+    "url": "https://git.f13.io/f13-dev/activepieces-freescout/issues"
+  },
+  "homepage": "https://github.com/f13io/activepieces-freescout",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
