@@ -19,6 +19,14 @@ Auth is a FreeScout instance URL + API key (`X-FreeScout-API-Key` header), since
 
 Triggers are not built yet (planned: webhook-based `New Conversation` / `New Customer Reply` / `New Note`, backed by FreeScout's native webhook subscription API).
 
+## Code Mirrors
+Source code is automatically pushed to the following mirrors. **Note that issues and pull requests should be issued on the [main forge](https://git.f13.io/f13-dev/activepieces-freescout).**
+
+[![Static Badge](https://img.shields.io/badge/git.F13.io-main_forge-8A2BE2?logo=forgejo&logoColor=white)](https://git.f13.io/f13-dev/activepieces-freescout) [![Open Issues](https://git.f13.io/f13-dev/activepieces-freescout/badges/issues/open.svg)](https://git.f13.io/f13-dev/activepieces-freescout/issues) [![Open Pulls](https://git.f13.io/f13-dev/activepieces-freescout/badges/pulls/open.svg)](https://git.f13.io/f13-dev/activepieces-freescout/pulls)
+
+[![Static Badge](https://img.shields.io/badge/GitHub-mirror_and_actions-white?logo=github&logoColor=white)](https://github.com/f13io/activepieces-freescout)
+
+
 ## Developing
 
 This repo holds just the piece's source. Activepieces pieces build inside the framework's own monorepo, so a devcontainer is set up to clone that monorepo (pinned to a known-good commit) and wire this piece in automatically — you don't need to set any of that up by hand.
@@ -44,11 +52,11 @@ devcontainer exec --workspace-folder . bash -lc "cd ~/activepieces && npm start"
 
 ### Bumping the pinned Activepieces version
 
-`.devcontainer/setup.sh` clones activepieces at a specific commit (`ACTIVEPIECES_REF` near the top of the file). Bump it deliberately when you want a newer upstream version, then rebuild the container.
+`.devcontainer/Dockerfile` clones activepieces at a specific commit (`ACTIVEPIECES_REF` build arg near the top of the file). The clone is baked into the image at build time — bind-mounting this piece's repo directly onto a path inside a runtime symlink target doesn't work, since Turborepo's workspace discovery rejects a workspace package whose real path resolves outside the monorepo root. Bump the ref deliberately when you want a newer upstream version, then rebuild the container.
 
 ## Testing changes
 
-The piece's source is symlinked into the cloned monorepo, so edits here trigger the framework's own hot-reload — watch for `Changes are ready! Please refresh the frontend.` in the `npm start` output, then refresh the flow builder.
+This piece's repo is bind-mounted directly onto its path inside the cloned monorepo (`devcontainer.json`'s `mounts`), so edits here trigger the framework's own hot-reload — watch for `Changes are ready! Please refresh the frontend.` in the `npm start` output, then refresh the flow builder.
 
 **Note:** adding a *new* action or trigger name (not just editing an existing one) requires restarting `npm start`. The execution engine caches loaded piece modules in memory and only picks up new exports on restart — editing an existing action's logic hot-reloads fine, but a brand-new action name won't be runnable until you restart.
 
