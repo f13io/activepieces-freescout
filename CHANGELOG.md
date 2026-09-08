@@ -10,6 +10,11 @@ the commit that ships it — the publish workflow checks this and fails if they 
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-08
+
+No functional changes. Test release to verify the npm Trusted Publishing pipeline
+(`.github/workflows/publish-piece.yml`) end-to-end after the manual bootstrap publish of 0.1.0.
+
 ## [0.1.0] - 2026-09-08
 
 Initial release.
