@@ -23,6 +23,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write # required for npm's OIDC-based Trusted Publishing
 
 jobs:
   publish:
@@ -102,17 +103,28 @@ jobs:
         working-directory: activepieces-monorepo
         run: bun install --frozen-lockfile
 
-      - name: Setup Node for npm publish auth
+      - name: Setup Node for npm registry
         if: steps.check.outputs.should_publish == 'true'
         uses: actions/setup-node@v4
         with:
           registry-url: 'https://registry.npmjs.org'
 
+      # Trusted Publishing needs no token: npm's CLI detects it's running in
+      # GitHub Actions with id-token: write permission, exchanges a GitHub
+      # OIDC token for a short-lived publish credential, and uses that — as
+      # long as the npm CLI is new enough (>=11.5.1) and npmjs.com has this
+      # exact repo+workflow configured as a trusted publisher for the
+      # package. The actual `npm publish` call happens deep inside
+      # activepieces' own publish-npm-package.ts (code we don't control), so
+      # we can't pass it flags directly — upgrading the npm binary here is
+      # what makes that inherited call OIDC-capable.
+      - name: Ensure npm supports Trusted Publishing
+        if: steps.check.outputs.should_publish == 'true'
+        run: npm install -g npm@latest
+
       - name: Build and publish to npm
         if: steps.check.outputs.should_publish == 'true'
         working-directory: activepieces-monorepo
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bun run publish-piece -- freescout
 
       - name: Extract this version's changelog section
