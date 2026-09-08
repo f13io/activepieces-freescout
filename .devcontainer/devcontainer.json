@@ -1,0 +1,9 @@
+{
+  "name": "FreeScout Piece Dev",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [3000, 4200],
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "remoteUser": "node"
+}

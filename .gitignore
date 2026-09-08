@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+
+# Reference material mirrored from public docs — not part of the piece.
+# See README.md for links to the public sources instead.
+/activepieces-docs/
+/freescout-api-docs/
+
+# Local Claude Code session state
+/.claude/
