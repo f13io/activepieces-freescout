@@ -4,6 +4,7 @@ import { createConversation } from './lib/actions/create-conversation';
 import { createThread } from './lib/actions/create-thread';
 import { createCustomer } from './lib/actions/create-customer';
 import { updateCustomer } from './lib/actions/update-customer';
+import { updateConversationTags } from './lib/actions/update-conversation-tags';
 import { findCustomer } from './lib/actions/find-customer';
 import { freescoutCustomApiCall } from './lib/actions/custom-api-call';
 import { newConversation } from './lib/triggers/new-conversation';
@@ -22,6 +23,7 @@ export const freescout = createPiece({
     updateCustomer,
     createConversation,
     createThread,
+    updateConversationTags,
     freescoutCustomApiCall,
   ],
   triggers: [newConversation, newCustomerReply],

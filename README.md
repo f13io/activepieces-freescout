@@ -13,6 +13,7 @@ Actions:
 - **Update Customer**
 - **Create Conversation** — starts a new conversation with an initial message from the customer, an agent reply, or an internal note.
 - **Create Thread (Reply / Note)** — adds a reply or note to an existing conversation.
+- **Update Conversation Tags** — replaces a conversation's tags (not additive); requires the [Tags](https://freescout.net/module/tags/) module.
 - **Custom API Call** — fallback for any FreeScout endpoint not covered above.
 
 Auth is a FreeScout instance URL + API key (`X-FreeScout-API-Key` header), since FreeScout is self-hosted rather than a single cloud API. Requires the **API & Webhooks** module installed on the FreeScout instance to get an API key (Manage » API & Webhooks).

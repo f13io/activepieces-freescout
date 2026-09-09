@@ -28,20 +28,7 @@ All of these reuse `createFreescoutWebhookTrigger` in `src/lib/common/webhook-tr
 7. **Conversation Deleted** (`convo.deleted`) — lowest priority of the set; cleanup automations
    are a narrower use case than the others here.
 
-## 2. Update Conversation Tags (action)
-
-Trivial — `PUT /conversations/:id/tags`, same request/response shape as the existing actions.
-Enables tag-based routing and automation (e.g. a flow tags a conversation based on content
-analysis, another flow reacts to the tag).
-
-Requires the FreeScout instance to have the [Tags](https://freescout.net/module/tags/) module
-installed — same as API & Webhooks is required for auth (see README). The API docs don't say
-this outright for the tags endpoints themselves, but do say it explicitly for the Reports tag
-filter, and tags are a separate installable module in FreeScout, not core — worth a `found:
-false`-style guard or a clear error if the endpoint 404s/501s on an instance without it, same
-spirit as `find_customer`'s existing not-found handling.
-
-## 3. Add Attachment to Thread (action)
+## 2. Add Attachment to Thread (action)
 
 Extends the existing `create_thread` action, which currently has no attachment support.
 FreeScout accepts attachments as base64 `data` or a `fileUrl` per attachment. "Reply with a
@@ -52,7 +39,7 @@ reply), so this is a real functionality gap rather than a nice-to-have.
 anywhere yet — this would be the first action to need that, including base64-encoding the file
 content into the request body.
 
-## 4. Polling trigger support
+## 3. Polling trigger support
 
 FreeScout instances that can't expose a public webhook URL (no tunnel, no reverse proxy, closed
 network) currently can't use this piece's triggers at all, since both existing triggers are
@@ -63,29 +50,29 @@ filters, which map cleanly onto Activepieces' [polling-trigger helper](https://w
 pattern, distinct from the webhook-trigger factory. Once built, it's a reasonable fallback/
 alternative for any of the events in section 1, not just conversation-created.
 
-## 5. List/Search Conversations (action)
+## 4. List/Search Conversations (action)
 
 Filterable by mailbox, folder, status, tag, customer email, and date range. Useful standalone
 (e.g. "did this customer already have an open conversation") or as a data source feeding a loop
 step in a flow.
 
-**Moderate complexity**: needs dropdown props for mailbox and folder (see section 6 — worth
+**Moderate complexity**: needs dropdown props for mailbox and folder (see section 5 — worth
 sequencing after the dropdown-prop helpers below so this action can reuse them).
 
-## 6. Reusable dropdown props: mailboxes, folders, tags
+## 5. Reusable dropdown props: mailboxes, folders, tags
 
 Not standalone actions on their own — these are `List Mailboxes` / `List Folders` / `List Tags`
 API calls wrapped as reusable Activepieces dropdown props, used to power selection fields in
-other actions (section 5's mailbox/folder filters, a future tag-picker for section 2, etc.).
-Worth building before or alongside section 5 rather than after, since it directly improves that
-action's UX instead of shipping a raw ID text field first.
+other actions (section 4's mailbox/folder filters, a tag-picker for `Update Conversation Tags`,
+etc.). Worth building before or alongside section 4 rather than after, since it directly
+improves that action's UX instead of shipping a raw ID text field first.
 
-## 7. Get Conversation / Delete Conversation (actions)
+## 6. Get Conversation / Delete Conversation (actions)
 
 Straightforward, same shape as existing single-resource actions (`Find Customer by Email`,
 `Update Customer`). Rounds out basic conversation CRUD.
 
-## 8. Update Custom Fields (conversation and/or customer)
+## 7. Update Custom Fields (conversation and/or customer)
 
 Only relevant for FreeScout instances that actually use custom fields, so lower priority unless
 requested. **Needs new infrastructure**: field sets vary per mailbox/instance, so this likely
