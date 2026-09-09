@@ -1,5 +1,7 @@
 # activepieces-freescout
 
+[![NPM Version](https://img.shields.io/npm/v/%40figure13%2Fpiece-freescout)](https://www.npmjs.com/package/@figure13/piece-freescout)
+
 An [Activepieces](https://www.activepieces.com/) custom piece for [FreeScout](https://freescout.net/), a self-hosted help desk / shared mailbox.
 
 > This piece, its devcontainer setup, and this repo were built with AI assistance (Claude Code). See [AI_DISCLAIMER.md](AI_DISCLAIMER.md) for details. Contributions and review are welcome the same as any other project.
@@ -30,9 +32,10 @@ See [ROADMAP.md](ROADMAP.md) for candidate features not yet built, in suggested 
 ## Code Mirrors
 Source code is automatically pushed to the following mirrors. **Note that issues and pull requests should be issued on the [main forge](https://git.f13.io/f13-dev/activepieces-freescout).**
 
-[![Static Badge](https://img.shields.io/badge/git.F13.io-main_forge-8A2BE2?logo=forgejo&logoColor=white)](https://git.f13.io/f13-dev/activepieces-freescout) [![Open Issues](https://git.f13.io/f13-dev/activepieces-freescout/badges/issues/open.svg)](https://git.f13.io/f13-dev/activepieces-freescout/issues) [![Open Pulls](https://git.f13.io/f13-dev/activepieces-freescout/badges/pulls/open.svg)](https://git.f13.io/f13-dev/activepieces-freescout/pulls)
+[![Static Badge](https://img.shields.io/badge/git.F13.io-main_forge-8A2BE2?logo=forgejo&logoColor=white)](https://git.f13.io/f13-dev/activepieces-freescout) [![Latest Release](https://git.f13.io/f13-dev/activepieces-freescout/badges/release.svg)](https://git.f13.io/f13-dev/activepieces-freescout/releases) [![Open Issues](https://git.f13.io/f13-dev/activepieces-freescout/badges/issues/open.svg)](https://git.f13.io/f13-dev/activepieces-freescout/issues) [![Open Pulls](https://git.f13.io/f13-dev/activepieces-freescout/badges/pulls/open.svg)](https://git.f13.io/f13-dev/activepieces-freescout/pulls)
 
-[![Static Badge](https://img.shields.io/badge/GitHub-mirror_and_actions-white?logo=github&logoColor=white)](https://github.com/f13io/activepieces-freescout)
+[![Static Badge](https://img.shields.io/badge/GitHub-mirror_and_actions-white?logo=github&logoColor=white)](https://github.com/f13io/activepieces-freescout) [![Publish Piece](https://github.com/f13io/activepieces-freescout/actions/workflows/publish-piece.yml/badge.svg)](https://github.com/f13io/activepieces-freescout/actions/workflows/publish-piece.yml) [![GitHub Release](https://img.shields.io/github/v/release/f13io/activepieces-freescout?color=0D74B4)](https://github.com/f13io/activepieces-freescout/releases)
+
 
 
 ## Developing
