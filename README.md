@@ -15,7 +15,7 @@ In your Activepieces instance, log in as a platform admin, then:
 3. **Piece Name**: `@figure13/piece-freescout`
 4. **Piece Version**: the latest version on [npm](https://www.npmjs.com/package/@figure13/piece-freescout).
 
-**This piece does not auto-update.** Activepieces' hourly piece-sync job only reconciles official pieces against the cloud registry — custom/npm-registry pieces are explicitly excluded from it (see [Piece Syncing & Versioning](https://www.activepieces.com/docs/install/architecture/piece-syncing)). To pick up a new release, a platform admin has to revisit the Pieces screen and update the installed version by hand. Even then, existing flow steps stay pinned to whichever version they were added with — each one needs a manual version bump in the flow builder to actually pick up the update.
+**This piece does not auto-update.** Activepieces' hourly piece-sync job only reconciles official pieces against the cloud registry — custom/npm-registry pieces are explicitly excluded from it (see [Piece Syncing & Versioning](https://www.activepieces.com/docs/install/architecture/piece-syncing)). To pick up a new release, a platform admin has to revisit the Pieces screen and update the installed version by hand — follow the same **Install Piece** steps above, just with the newer version number. Even then, existing flow steps stay pinned to whichever version they were added with — each one needs a manual version bump in the flow builder to actually pick up the update.
 
 ## What's included
 
