@@ -10,6 +10,8 @@ the commit that ships it — the publish workflow checks this and fails if they 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-09
+
 ### Added
 
 - Auth: optional Webhook Signing Key. When set, both triggers verify the `X-FreeScout-Signature`
