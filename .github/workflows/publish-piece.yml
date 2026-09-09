@@ -137,6 +137,18 @@ jobs:
         run: |
           NAME="${{ steps.check.outputs.name }}"
           VERSION="${{ steps.check.outputs.version }}"
+          NPM_URL="https://www.npmjs.com/package/$NAME/v/$VERSION"
+
+          # Two trailing spaces after the badge line force a markdown line
+          # break, so it and the plain link land on consecutive lines. The
+          # changelog entry's own leading blank line (heading, blank, body —
+          # consistent throughout CHANGELOG.md) supplies the single blank
+          # line before its content, so nothing added here.
+          {
+            echo "[![npm version badge](https://img.shields.io/badge/npm-v$VERSION-orange)]($NPM_URL)  "
+            echo "$NPM_URL"
+          } > /tmp/release-notes.md
+
           awk -v ver="$VERSION" '
             /^## \[/ {
               if (found) exit
@@ -144,11 +156,7 @@ jobs:
               next
             }
             found { print }
-          ' CHANGELOG.md > /tmp/release-notes.md
-          {
-            echo ""
-            echo "npm: https://www.npmjs.com/package/$NAME/v/$VERSION"
-          } >> /tmp/release-notes.md
+          ' CHANGELOG.md >> /tmp/release-notes.md
           echo "--- release notes ---"
           cat /tmp/release-notes.md
 
