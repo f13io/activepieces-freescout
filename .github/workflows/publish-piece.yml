@@ -135,6 +135,7 @@ jobs:
       - name: Extract this version's changelog section
         if: steps.check.outputs.should_publish == 'true'
         run: |
+          NAME="${{ steps.check.outputs.name }}"
           VERSION="${{ steps.check.outputs.version }}"
           awk -v ver="$VERSION" '
             /^## \[/ {
@@ -144,6 +145,10 @@ jobs:
             }
             found { print }
           ' CHANGELOG.md > /tmp/release-notes.md
+          {
+            echo ""
+            echo "npm: https://www.npmjs.com/package/$NAME/v/$VERSION"
+          } >> /tmp/release-notes.md
           echo "--- release notes ---"
           cat /tmp/release-notes.md
 
