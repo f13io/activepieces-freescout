@@ -10,6 +10,13 @@ the commit that ships it — the publish workflow checks this and fails if they 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-08
+
+### Added
+
+- Action: Update Conversation Tags — replaces a conversation's tags (not additive). Requires the
+  [Tags](https://freescout.net/module/tags/) module on the FreeScout instance.
+
 ## [0.1.1] - 2026-09-08
 
 No functional changes. Test release to verify the npm Trusted Publishing pipeline

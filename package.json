@@ -1,6 +1,6 @@
 {
   "name": "@figure13/piece-freescout",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Activepieces custom piece for FreeScout (self-hosted help desk)",
   "license": "Apache-2.0",
   "repository": {
