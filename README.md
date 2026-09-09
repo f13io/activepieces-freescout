@@ -24,6 +24,8 @@ Triggers (webhook-based, backed by FreeScout's native webhook subscription API):
 
 More event triggers (New Note, Status Changed, etc.) can be added the same way — see `src/lib/common/webhook-trigger-factory.ts`.
 
+See [ROADMAP.md](ROADMAP.md) for candidate features not yet built, in suggested priority order.
+
 ## Code Mirrors
 Source code is automatically pushed to the following mirrors. **Note that issues and pull requests should be issued on the [main forge](https://git.f13.io/f13-dev/activepieces-freescout).**
 
@@ -57,7 +59,7 @@ devcontainer exec --workspace-folder . bash -lc "cd ~/activepieces && npm start"
 
 ### Bumping the pinned Activepieces version
 
-`.devcontainer/Dockerfile` clones activepieces at a specific commit (`ACTIVEPIECES_REF` build arg near the top of the file). The clone is baked into the image at build time — bind-mounting this piece's repo directly onto a path inside a runtime symlink target doesn't work, since Turborepo's workspace discovery rejects a workspace package whose real path resolves outside the monorepo root. Bump the ref deliberately when you want a newer upstream version, then rebuild the container.
+`.devcontainer/Dockerfile` clones activepieces at the commit pinned in `activepieces-ref.txt` (repo root) — the same file the publish workflow reads, so dev and CI/publish never drift apart. The clone is baked into the image at build time — bind-mounting this piece's repo directly onto a path inside a runtime symlink target doesn't work, since Turborepo's workspace discovery rejects a workspace package whose real path resolves outside the monorepo root. Bump `activepieces-ref.txt` deliberately when you want a newer upstream version, then rebuild the container.
 
 ## Testing changes
 
@@ -86,6 +88,16 @@ What it does, if you'd rather make the edits by hand or are debugging why someth
 3. **`packages/web/vite.config.mts`** — set `server.hmr` to `{ protocol: 'wss', clientPort: 443 }`. Without this, Vite's injected HMR client tries to open its websocket directly against `ws://localhost:4200`, which an HTTPS-loaded page blocks as mixed content — symptom is a reload loop once you open the tunnel URL.
 
 These are edits to the *cloned Activepieces checkout* (`~/activepieces`), not to this repo, so they aren't committed anywhere and won't survive a container rebuild — that's exactly why the script exists, so reapplying them is a one-liner instead of hunting this section down again.
+
+## Publishing
+
+Releases go out as [`@figure13/piece-freescout`](https://www.npmjs.com/package/@figure13/piece-freescout) on npm, via `.github/workflows/publish-piece.yml`. To ship a release:
+
+1. Bump `version` in `package.json`.
+2. Add a matching `## [x.y.z]` entry to `CHANGELOG.md` — the workflow fails the build if it's missing.
+3. Push to `main` (this repo mirrors Forgejo → GitHub, and the workflow runs on the GitHub side).
+
+Every push to `main` triggers the workflow, but it no-ops past a quick "is this version already published" check unless the version was actually bumped — so ordinary commits don't need a separate release step. Once triggered for real, it bootstraps a checkout of the pinned activepieces monorepo, builds the piece there, and publishes to npm via [Trusted Publishing](https://docs.npmjs.com/trusted-publishers) (OIDC — no stored token), then creates matching GitHub and Forgejo releases using that version's changelog entry as the release notes.
 
 ## References
 
