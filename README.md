@@ -31,6 +31,10 @@ Actions:
 
 Auth is a FreeScout instance URL + API key (`X-FreeScout-API-Key` header), since FreeScout is self-hosted rather than a single cloud API. Requires the **API & Webhooks** module installed on the FreeScout instance to get an API key (Manage » API & Webhooks).
 
+Auth also has an optional **Webhook Signing Key** field (the "Secret Key" from the same Manage » Settings » API & Webhooks page). When set, both triggers verify each delivery's `X-FreeScout-Signature` header (HMAC-SHA1 over the raw body) and silently drop anything that fails verification instead of running the flow. Leave it blank to skip verification entirely.
+
+**Known limitation:** a rejected (bad-signature) delivery still shows as a successful call in FreeScout's own webhook log. Activepieces' webhook URL responds `200 OK` as soon as the request is queued, before the piece code that checks the signature ever runs — there's no supported way for a piece to make that initial response reflect the outcome of its own verification logic. The protection itself still works (the payload never reaches the flow); FreeScout's log just won't show that it was rejected.
+
 Triggers (webhook-based, backed by FreeScout's native webhook subscription API):
 
 - **New Conversation** — fires on `convo.created`.

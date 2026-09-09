@@ -10,6 +10,11 @@ the commit that ships it — the publish workflow checks this and fails if they 
 
 ## [Unreleased]
 
+### Added
+
+- Auth: optional Webhook Signing Key. When set, both triggers verify the `X-FreeScout-Signature`
+  header (HMAC-SHA1) on incoming webhooks and silently drop anything that fails verification.
+
 ## [0.2.0] - 2026-09-08
 
 ### Added

@@ -15,6 +15,12 @@ export const freescoutAuth = PieceAuth.CustomAuth({
       displayName: 'API Key',
       required: true,
     }),
+    webhookSigningKey: PieceAuth.SecretText({
+      displayName: 'Webhook Signing Key',
+      description:
+        'Optional. Find it under Manage » Settings » API & Webhooks ("Secret Key"). When set, incoming webhooks are verified against their X-FreeScout-Signature header, and anything that fails verification is silently dropped instead of triggering a flow. Leave blank to skip verification and accept all deliveries.',
+      required: false,
+    }),
   },
   validate: async ({ auth }) => {
     try {

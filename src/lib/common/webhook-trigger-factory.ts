@@ -2,6 +2,7 @@ import { createTrigger, TriggerStrategy } from '@activepieces/pieces-framework';
 import { HttpMethod } from '@activepieces/pieces-common';
 import { freescoutAuth } from './auth';
 import { freescoutApiCall, getResourceId } from './client';
+import { verifyFreescoutSignature } from './webhook-signature';
 
 export function createFreescoutWebhookTrigger(params: {
   name: string;
@@ -41,6 +42,14 @@ export function createFreescoutWebhookTrigger(params: {
       }
     },
     async run(context) {
+      const isValid = verifyFreescoutSignature({
+        rawBody: context.payload.rawBody,
+        signatureHeader: context.payload.headers['x-freescout-signature'],
+        secret: context.auth.props.webhookSigningKey,
+      });
+      if (!isValid) {
+        return [];
+      }
       return [context.payload.body];
     },
   });
