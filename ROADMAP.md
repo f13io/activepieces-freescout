@@ -34,6 +34,13 @@ Trivial — `PUT /conversations/:id/tags`, same request/response shape as the ex
 Enables tag-based routing and automation (e.g. a flow tags a conversation based on content
 analysis, another flow reacts to the tag).
 
+Requires the FreeScout instance to have the [Tags](https://freescout.net/module/tags/) module
+installed — same as API & Webhooks is required for auth (see README). The API docs don't say
+this outright for the tags endpoints themselves, but do say it explicitly for the Reports tag
+filter, and tags are a separate installable module in FreeScout, not core — worth a `found:
+false`-style guard or a clear error if the endpoint 404s/501s on an instance without it, same
+spirit as `find_customer`'s existing not-found handling.
+
 ## 3. Add Attachment to Thread (action)
 
 Extends the existing `create_thread` action, which currently has no attachment support.
